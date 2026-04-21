@@ -1,0 +1,54 @@
+1. List all students.
+
+	db.students.find()
+
+2. Show students and their departments.
+
+	db.students.find(
+		{},
+		{"_id":0,"full_name":1,"department.name":1}
+	)
+
+3. Count students by status.
+
+	db.students.aggregate(
+		[{$group: 
+			{_id: "$status",total_students: { $sum: 1 }}
+		}]
+	)
+
+4. Show students enrolled in CS101.
+
+	db.students.find(
+		{"enrolled_courses.code":"CS101"},
+		{_id:0,full_name:1,enrolled_courses:{$elemMatch:{code:"CS101"}}}
+	)
+
+5. Show each student together with course code and course title.
+	
+	db.students.aggregate([{$unwind:"$enrolled_courses"},
+	{$project:{
+		"_id":0,"full_name":1,
+		"course_code":"$enrolled_courses.code",
+		"course_title":"$enrolled_courses.title"}
+	}])
+	
+
+6. Find students with no enrolled courses.
+
+	 db.students.find({ "enrolled_courses": { $size: 0 } })
+
+7. Find students from Data Science.
+
+	db.students.find(
+		{"department.name":"Data Science"},
+		{_id:0,full_name:1,department_name:"$department.name"}
+	)
+
+
+8. Find students with status inactive or suspended.
+
+	db.students.find(
+		{$or:[{"status":"inactive"},{"status":"suspended"}]},
+		{ _id: 0,full_name:1,status:1 }
+	)
